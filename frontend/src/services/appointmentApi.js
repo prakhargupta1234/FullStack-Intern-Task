@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api/appointments';
+// When running with Vite dev proxy, '/api/appointments' connects seamlessly
+// If VITE_API_URL is provided, it uses that directly.
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/appointments';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,

@@ -1,4 +1,6 @@
 import os
+import time
+import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,57 +11,68 @@ from app.database import engine, Base, SessionLocal
 from app.routers import appointments_router
 from app.services import seed_sample_data_if_empty
 
+# Configure structured application logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+logger = logging.getLogger("appointment_board")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
-    Application startup and shutdown event handler.
-    Creates tables if they don't exist and seeds sample appointments if empty.
+    Handles startup and shutdown events.
+    Auto-creates database tables and seeds initial sample appointments if empty.
     """
-    # Create tables
+    logger.info("Initializing database tables via SQLAlchemy metadata...")
     Base.metadata.create_all(bind=engine)
 
-    # Seed sample appointments if table is empty
     db = SessionLocal()
     try:
         seed_sample_data_if_empty(db)
+    except Exception as exc:
+        logger.error(f"Failed to seed sample appointments on startup: {exc}")
     finally:
         db.close()
 
     yield
-    # Cleanup actions (if any) on shutdown
+    logger.info("Shutting down Appointment Board API...")
 
 
 app = FastAPI(
     title="Appointment Board API",
-    description="RESTful API for managing team appointments with conflict detection",
+    description="Backend service for scheduling team appointments with real-time conflict checking.",
     version="1.0.0",
     lifespan=lifespan,
     docs_url="/docs",
     redoc_url="/redoc",
 )
 
-# CORS configuration
-frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
-origins = [
-    frontend_url,
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:3000",
-]
-
+# CORS configuration supporting localhost dev ports
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    """Logs incoming HTTP requests with execution duration."""
+    start_time = time.time()
+    response = await call_next(request)
+    duration_ms = round((time.time() - start_time) * 1000, 2)
+    logger.info(f"{request.method} {request.url.path} completed with {response.status_code} ({duration_ms}ms)")
+    return response
+
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    """Format Pydantic request validation errors into a clean, human-readable format."""
+    """Normalizes Pydantic input validation errors into client-friendly messages."""
     errors = exc.errors()
     messages = []
     for err in errors:
@@ -74,20 +87,19 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 @app.exception_handler(Exception)
 async def generic_exception_handler(request: Request, exc: Exception):
-    """Catch-all exception handler to avoid raw stack traces leaking to clients."""
-    # Print internally for server debugging
-    print(f"Internal Server Error: {exc}")
+    """Catches unhandled exceptions so stack traces don't leak to API consumers."""
+    logger.exception(f"Unhandled server error processing {request.method} {request.url.path}: {exc}")
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={"detail": "An unexpected internal server error occurred. Please try again later."},
     )
 
 
-# Register routers
+# Attach routers
 app.include_router(appointments_router)
 
 
-@app.get("/health", tags=["Health"])
+@app.get("/health", tags=["System"])
 def health_check():
-    """Health check endpoint."""
+    """Liveness probe endpoint."""
     return {"status": "healthy", "service": "appointment-board-api"}
