@@ -61,6 +61,22 @@ export const AppointmentBoard = () => {
     loadAppointments();
   }, [loadAppointments]);
 
+  // Keyboard shortcut: Press 'N' to open Add Appointment modal (when not focused in an input)
+  useEffect(() => {
+    const handleGlobalKeyDown = (e) => {
+      const activeTag = document.activeElement?.tagName?.toLowerCase();
+      if (activeTag === 'input' || activeTag === 'textarea' || activeTag === 'select') {
+        return;
+      }
+      if ((e.key === 'n' || e.key === 'N') && !isModalOpen && !cancelModalAppointment) {
+        e.preventDefault();
+        handleOpenAddModal();
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [isModalOpen, cancelModalAppointment]);
+
   // Handlers for Add / Edit Modal
   const handleOpenAddModal = () => {
     setEditingAppointment(null);
@@ -199,6 +215,9 @@ export const AppointmentBoard = () => {
               >
                 <Plus className="w-4 h-4" />
                 <span>Add Appointment</span>
+                <kbd className="hidden sm:inline-block ml-1 px-1.5 py-0.5 text-[10px] font-mono bg-blue-700/50 rounded border border-blue-400/30 text-blue-100 font-normal">
+                  N
+                </kbd>
               </button>
             </div>
           </div>
