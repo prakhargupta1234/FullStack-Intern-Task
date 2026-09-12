@@ -159,6 +159,50 @@ class TestAppointmentLogic(unittest.TestCase):
         )
         self.assertEqual(updated.title, "[TEST] Updated Title")
 
+    def test_conflict_when_new_appointment_encloses_existing(self):
+        """Enclosing appointment (starts before and ends after) must be rejected."""
+        appointment_service.create_appointment(
+            self.db,
+            AppointmentCreate(
+                title="[TEST] Existing Inner Slot",
+                date=self.test_date,
+                start_time=time(10, 30),
+                end_time=time(11, 0),
+            ),
+        )
+        with self.assertRaises(HTTPException) as ctx:
+            appointment_service.create_appointment(
+                self.db,
+                AppointmentCreate(
+                    title="[TEST] Enclosing Slot",
+                    date=self.test_date,
+                    start_time=time(10, 0),
+                    end_time=time(11, 30),
+                ),
+            )
+        self.assertEqual(ctx.exception.status_code, 409)
+
+    def test_conflict_when_new_appointment_is_inside_existing(self):
+        """Interior appointment (starts after and ends before) must be rejected."""
+        appointment_service.create_appointment(
+            self.db,
+            AppointmentCreate(
+                title="[TEST] Existing Outer Slot",
+                date=self.test_date,
+                start_time=time(14, 0),
+                end_time=time(15, 30),
+            ),
+        )
+        with self.assertRaises(HTTPException) as ctx:
+            appointment_service.create_appointment(
+                self.db,
+                AppointmentCreate(
+                    title="[TEST] Inside Slot",
+                    date=self.test_date,
+                    start_time=time(14, 15),
+                    end_time=time(14, 45),
+                ),
+            )
     def test_cannot_complete_cancelled_appointment(self):
         """Transitioning Cancelled -> Completed must raise 400 Bad Request."""
         app = appointment_service.create_appointment(
@@ -179,3 +223,5 @@ class TestAppointmentLogic(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+

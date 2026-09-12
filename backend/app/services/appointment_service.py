@@ -187,10 +187,7 @@ def cancel_appointment(db: Session, appointment_id: int) -> Appointment:
 
 
 def seed_sample_data_if_empty(db: Session) -> None:
-    """
-    Seeds initial realistic team appointments if the table is empty.
-    Avoids duplicating data across application restarts.
-    """
+    """Seed initial sample appointments if table is empty."""
     existing_count = db.query(Appointment).count()
     if existing_count > 0:
         return
@@ -200,40 +197,40 @@ def seed_sample_data_if_empty(db: Session) -> None:
 
     sample_appointments = [
         Appointment(
-            title="Sprint 24 Daily Standup",
-            description="Quick 30-minute sync on backend API integration, blockers, and PR reviews.",
+            title="Team Sync & Daily Standup",
+            description="Morning check-in on current tasks, blockers, and PR reviews.",
             date=today,
             start_time=time(9, 0, 0),
             end_time=time(9, 30, 0),
             status=AppointmentStatus.SCHEDULED.value,
         ),
         Appointment(
-            title="Q3 Client Roadmap Demo - Acme Corp",
-            description="Quarterly feature demonstration covering dashboard metrics and reporting exports.",
+            title="Client Onboarding Walkthrough",
+            description="Product demonstration and setup session with new client stakeholders.",
             date=today,
             start_time=time(10, 0, 0),
             end_time=time(11, 0, 0),
             status=AppointmentStatus.SCHEDULED.value,
         ),
         Appointment(
-            title="Architecture Review & Post-Mortem",
-            description="Database query optimization retrospective and slow query log analysis.",
+            title="Sprint Planning & Backlog Grooming",
+            description="Reviewing upcoming user stories and estimations for next release.",
             date=today,
             start_time=time(11, 30, 0),
             end_time=time(12, 30, 0),
             status=AppointmentStatus.COMPLETED.value,
         ),
         Appointment(
-            title="Design System & UI Component Sync",
-            description="Tailwind CSS color token alignment (rescheduled due to stakeholder conflict).",
+            title="UI/UX Design Review",
+            description="Discussion on design tokens and responsive layouts (rescheduled).",
             date=today,
             start_time=time(13, 0, 0),
             end_time=time(14, 0, 0),
             status=AppointmentStatus.CANCELLED.value,
         ),
         Appointment(
-            title="Full Stack Engineer Interview - Round 2",
-            description="Live coding and systems design evaluation for senior candidate.",
+            title="Technical Interview: Full Stack",
+            description="System design and coding discussion with prospective developer.",
             date=tomorrow,
             start_time=time(14, 30, 0),
             end_time=time(15, 30, 0),
@@ -243,4 +240,4 @@ def seed_sample_data_if_empty(db: Session) -> None:
 
     db.add_all(sample_appointments)
     db.commit()
-    logger.info(f"Seeded {len(sample_appointments)} initial sample appointments into MySQL.")
+    logger.info(f"Seeded {len(sample_appointments)} initial sample appointments.")

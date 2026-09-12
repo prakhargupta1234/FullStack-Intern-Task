@@ -8,26 +8,21 @@ import ConfirmModal from '../components/ConfirmModal';
 import Toast from '../components/Toast';
 
 export const AppointmentBoard = () => {
-  // Appointments state
   const [appointments, setAppointments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Filters state
   const [filterDate, setFilterDate] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
 
-  // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formServerError, setFormServerError] = useState(null);
 
-  // Cancellation confirm modal state
   const [cancelModalAppointment, setCancelModalAppointment] = useState(null);
   const [isCancelling, setIsCancelling] = useState(false);
 
-  // Toast notification state
   const [toast, setToast] = useState({ message: '', type: 'success' });
 
   const showToast = (message, type = 'success') => {
@@ -38,7 +33,6 @@ export const AppointmentBoard = () => {
     setToast({ message: '', type: 'success' });
   };
 
-  // Fetch appointments from backend with active query params
   const loadAppointments = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -61,7 +55,7 @@ export const AppointmentBoard = () => {
     loadAppointments();
   }, [loadAppointments]);
 
-  // Keyboard shortcut: Press 'N' to open Add Appointment modal (when not focused in an input)
+  // Press 'N' to open Add Appointment modal when not inside an input
   useEffect(() => {
     const handleGlobalKeyDown = (e) => {
       const activeTag = document.activeElement?.tagName?.toLowerCase();
@@ -77,7 +71,6 @@ export const AppointmentBoard = () => {
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
   }, [isModalOpen, cancelModalAppointment]);
 
-  // Handlers for Add / Edit Modal
   const handleOpenAddModal = () => {
     setEditingAppointment(null);
     setFormServerError(null);
@@ -121,7 +114,6 @@ export const AppointmentBoard = () => {
     }
   };
 
-  // Handler for Complete Appointment
   const handleComplete = async (id) => {
     try {
       await appointmentApi.complete(id);
@@ -133,7 +125,6 @@ export const AppointmentBoard = () => {
     }
   };
 
-  // Handlers for Cancel Appointment
   const handlePromptCancel = (appointment) => {
     setCancelModalAppointment(appointment);
   };
@@ -159,7 +150,6 @@ export const AppointmentBoard = () => {
     }
   };
 
-  // Clear filters
   const handleClearFilters = () => {
     setFilterDate('');
     setFilterStatus('All');
@@ -169,16 +159,13 @@ export const AppointmentBoard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-slate-100/60 to-slate-200/50">
-      {/* Toast Notification Container */}
       <Toast
         message={toast.message}
         type={toast.type}
         onClose={closeToast}
       />
 
-      {/* Main Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-        {/* Header Section */}
         <header className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-slate-200/80">
             <div>
@@ -190,8 +177,8 @@ export const AppointmentBoard = () => {
                   Appointment Board
                 </h1>
               </div>
-              <p className="text-sm text-slate-600">
-                Manage your team's appointments efficiently
+              <p className="text-sm text-slate-500">
+                Coordinate and manage team appointments without scheduling conflicts
               </p>
             </div>
 
@@ -200,7 +187,7 @@ export const AppointmentBoard = () => {
                 type="button"
                 onClick={loadAppointments}
                 id="refresh-button"
-                className="p-2.5 text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-colors shadow-sm"
+                className="p-2.5 text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-colors shadow-sm cursor-pointer"
                 title="Refresh appointments"
                 aria-label="Refresh appointments"
               >
@@ -223,7 +210,6 @@ export const AppointmentBoard = () => {
           </div>
         </header>
 
-        {/* Filters Bar */}
         <AppointmentFilters
           filterDate={filterDate}
           filterStatus={filterStatus}
@@ -233,10 +219,8 @@ export const AppointmentBoard = () => {
           totalCount={appointments.length}
         />
 
-        {/* Content Area: Loading, Error, Empty, or Cards Grid */}
         <main>
           {isLoading ? (
-            /* Loading State / Skeleton Grid */
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="loading-state">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div
@@ -259,7 +243,6 @@ export const AppointmentBoard = () => {
               ))}
             </div>
           ) : error ? (
-            /* Error State */
             <div
               id="error-state"
               className="bg-rose-50 border border-rose-200 rounded-2xl p-8 text-center max-w-lg mx-auto shadow-sm"
@@ -273,13 +256,12 @@ export const AppointmentBoard = () => {
                 type="button"
                 id="error-retry-button"
                 onClick={loadAppointments}
-                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-xl transition-colors shadow-sm"
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-xl transition-colors shadow-sm cursor-pointer"
               >
                 Retry Connection
               </button>
             </div>
           ) : appointments.length === 0 ? (
-            /* Empty State */
             <div
               id="empty-state"
               className="bg-white border border-slate-200 rounded-2xl p-12 text-center max-w-lg mx-auto shadow-sm"
@@ -301,7 +283,7 @@ export const AppointmentBoard = () => {
                   type="button"
                   id="empty-clear-filters-button"
                   onClick={handleClearFilters}
-                  className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
                 >
                   Clear Filters
                 </button>
@@ -310,7 +292,7 @@ export const AppointmentBoard = () => {
                   type="button"
                   id="empty-add-appointment-button"
                   onClick={handleOpenAddModal}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors shadow-sm"
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors shadow-sm cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   Add Appointment
@@ -318,7 +300,6 @@ export const AppointmentBoard = () => {
               )}
             </div>
           ) : (
-            /* Appointments Grid */
             <div
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
               id="appointments-grid"
@@ -337,7 +318,6 @@ export const AppointmentBoard = () => {
         </main>
       </div>
 
-      {/* Add / Edit Appointment Modal */}
       <AppointmentModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
@@ -347,7 +327,6 @@ export const AppointmentBoard = () => {
         serverError={formServerError}
       />
 
-      {/* Cancel Confirmation Dialog */}
       <ConfirmModal
         isOpen={Boolean(cancelModalAppointment)}
         title="Cancel Appointment"

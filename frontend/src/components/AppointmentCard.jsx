@@ -2,9 +2,6 @@ import React from 'react';
 import { Calendar, Clock, Edit2, CheckCircle, Ban } from 'lucide-react';
 import StatusBadge from './StatusBadge';
 
-/**
- * Format time string 'HH:MM:SS' or 'HH:MM' to friendly 'h:mm AM/PM'
- */
 const formatDisplayTime = (timeStr) => {
   if (!timeStr) return '';
   const parts = timeStr.split(':');
@@ -17,9 +14,6 @@ const formatDisplayTime = (timeStr) => {
   return `${hour}:${minute} ${ampm}`;
 };
 
-/**
- * Format date string 'YYYY-MM-DD' to readable 'Month Day, Year'
- */
 const formatDisplayDate = (dateStr) => {
   if (!dateStr) return '';
   try {
@@ -59,7 +53,6 @@ export const AppointmentCard = ({
           : 'bg-white border-slate-200/90 shadow-sm hover:shadow-md hover:border-blue-200'
       }`}
     >
-      {/* Top Accent Strip */}
       <div
         className={`h-1.5 w-full ${
           isScheduled
@@ -71,7 +64,6 @@ export const AppointmentCard = ({
       />
 
       <div className="p-5 flex-1 flex flex-col">
-        {/* Card Header: Title & Status */}
         <div className="flex items-start justify-between gap-3 mb-2.5">
           <h3
             className={`text-base font-semibold leading-snug line-clamp-2 ${
@@ -85,14 +77,12 @@ export const AppointmentCard = ({
           </div>
         </div>
 
-        {/* Description */}
         <p className="text-xs text-slate-600 leading-relaxed mb-4 line-clamp-3 flex-1">
           {description || (
             <span className="text-slate-400 italic">No description provided</span>
           )}
         </p>
 
-        {/* Date & Time metadata */}
         <div className="pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-600">
           <div className="flex items-center gap-2">
             <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -107,9 +97,7 @@ export const AppointmentCard = ({
         </div>
       </div>
 
-      {/* Card Actions Footer */}
       <div className="px-5 py-3 bg-slate-50/70 border-t border-slate-100 flex items-center justify-end gap-2">
-        {/* Edit Action - enabled for Scheduled & Completed */}
         {!isCancelled && (
           <button
             type="button"
@@ -123,7 +111,6 @@ export const AppointmentCard = ({
           </button>
         )}
 
-        {/* Complete Action - only for Scheduled */}
         {isScheduled && (
           <button
             type="button"
@@ -137,7 +124,6 @@ export const AppointmentCard = ({
           </button>
         )}
 
-        {/* Cancel Action - for Scheduled or Completed */}
         {!isCancelled && (
           <button
             type="button"
@@ -151,7 +137,6 @@ export const AppointmentCard = ({
           </button>
         )}
 
-        {/* If Cancelled, show informational badge */}
         {isCancelled && (
           <span className="text-[11px] text-slate-400 italic py-1">
             Slot released

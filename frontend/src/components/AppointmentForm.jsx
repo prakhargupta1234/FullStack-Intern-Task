@@ -20,7 +20,6 @@ export const AppointmentForm = ({
 
   useEffect(() => {
     if (initialData) {
-      // Normalize times if they include seconds (e.g. 09:00:00 -> 09:00)
       const formatTimeInput = (t) => (t && t.length >= 5 ? t.substring(0, 5) : t || '');
       setFormData({
         title: initialData.title || '',
@@ -30,7 +29,6 @@ export const AppointmentForm = ({
         end_time: formatTimeInput(initialData.end_time),
       });
     } else {
-      // Defaults for a new appointment: today's date
       const today = new Date().toISOString().split('T')[0];
       setFormData({
         title: '',
@@ -47,7 +45,6 @@ export const AppointmentForm = ({
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Clear individual field error on change
     if (fieldErrors[name]) {
       setFieldErrors((prev) => ({ ...prev, [name]: null }));
     }
@@ -86,7 +83,6 @@ export const AppointmentForm = ({
     e.preventDefault();
     if (!validate()) return;
 
-    // Ensure seconds format (HH:MM:SS) for MySQL Time field
     const normalizeTimeToSeconds = (t) => (t.length === 5 ? `${t}:00` : t);
 
     onSubmit({
@@ -102,7 +98,6 @@ export const AppointmentForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4" noValidate id="appointment-form">
-      {/* Server Error Banner (e.g. 409 Conflict) */}
       {serverError && (
         <div
           id="form-server-error"
@@ -113,7 +108,6 @@ export const AppointmentForm = ({
         </div>
       )}
 
-      {/* Title Field */}
       <div>
         <label htmlFor="form-title" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
           Title <span className="text-rose-500">*</span>
@@ -142,7 +136,6 @@ export const AppointmentForm = ({
         )}
       </div>
 
-      {/* Description Field (Optional) */}
       <div>
         <label htmlFor="form-description" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
           Description <span className="text-slate-400 font-normal normal-case">(Optional)</span>
@@ -163,7 +156,6 @@ export const AppointmentForm = ({
         </div>
       </div>
 
-      {/* Date Field */}
       <div>
         <label htmlFor="form-date" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
           Date <span className="text-rose-500">*</span>
@@ -190,9 +182,7 @@ export const AppointmentForm = ({
         )}
       </div>
 
-      {/* Time Slots Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {/* Start Time */}
         <div>
           <label htmlFor="form-start-time" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
             Start Time <span className="text-rose-500">*</span>
@@ -219,7 +209,6 @@ export const AppointmentForm = ({
           )}
         </div>
 
-        {/* End Time */}
         <div>
           <label htmlFor="form-end-time" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
             End Time <span className="text-rose-500">*</span>
@@ -247,14 +236,13 @@ export const AppointmentForm = ({
         </div>
       </div>
 
-      {/* Buttons */}
       <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-100 mt-5">
         <button
           type="button"
           id="modal-cancel-button"
           onClick={onCancel}
           disabled={isSubmitting}
-          className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors disabled:opacity-50"
+          className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
         >
           Cancel
         </button>
@@ -262,7 +250,7 @@ export const AppointmentForm = ({
           type="submit"
           id="modal-submit-button"
           disabled={isSubmitting}
-          className="px-5 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all shadow-md shadow-blue-500/20 disabled:opacity-50 flex items-center gap-2"
+          className="px-5 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all shadow-md shadow-blue-500/20 disabled:opacity-50 flex items-center gap-2 cursor-pointer"
         >
           {isSubmitting ? (
             <>
